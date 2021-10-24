@@ -1,0 +1,14 @@
+#!/bin/sh -e
+#
+# Save mode_modules to speed up the following builds.
+#
+
+# Paths based on https://docs.openshift.org/latest/creating_images/s2i.html#s2i-scripts are wrong
+
+echo "---> Saving build artifacts (node_modules)" 1>&2
+pushd /tmp/src/ >/dev/null
+if [ -d node_modules ]; then
+    # all deps contents to tar stream
+    tar cf - node_modules
+fi
+popd >/dev/null

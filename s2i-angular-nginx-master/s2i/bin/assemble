@@ -1,0 +1,41 @@
+#!/bin/sh -e
+
+# Paths based on https://docs.openshift.org/latest/creating_images/s2i.html#s2i-scripts are wrong
+
+pushd /tmp/src
+
+if [ "$(ls /tmp/artifacts/ 2>/dev/null)" ]; then
+    echo "---> Restoring build artifacts (node_modules)"
+    mv /tmp/artifacts/* .
+fi
+
+echo "---> Installing NPM Dependencies (with dev)"
+npm install
+npm install --only=dev
+
+echo "---> Building Angular CLI Application"
+#./node_modules/@angular/cli/bin/ng build --prod
+npm run build ${BASE_HREF:+ -- --base-href "${BASE_HREF}"}
+
+path=$(cat angular.json | jq -r .defaultProject)
+if [ "${path}" == "null" ]; then
+    path=""
+fi
+
+echo "---> Angular Application path '${path}'"
+
+popd
+
+echo "---> Installing ${path} application to web container - ${PWD}"
+cp -Rf /tmp/src/dist/${path}/* ./
+
+if [ -d /tmp/src/.openshiftio/etc ]; then
+    echo "---> Copying custom nginx configs"
+    cp -vRf /tmp/src/.openshiftio/etc/* ../etc
+fi
+
+# echo "---> Removing application source"
+# rm -rf /tmp/src
+
+# Fix source directory permissions
+fix-permissions ./

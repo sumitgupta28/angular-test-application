@@ -1,0 +1,20 @@
+kind: ImageStream
+apiVersion: v1
+metadata:
+  annotations:
+    openshift.io/display-name: "Angular / Nginx Builder Image"
+  name: s2i-angular-nginx
+  creationTimestamp: 
+spec:
+  dockerImageRepository: klmcwhirter/s2i-angular-nginx
+  tags:
+  - name: latest
+    annotations:
+      description: Build Angular apps with CLI and run them with nginx:latest
+      iconClass: icon-angularjs
+      supports: angular,angular:1
+      tags: builder,angular,nginx
+      version: '1'
+    from:
+      kind: ImageStreamTag
+      name: latest
